@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  nginx:
+    build: ./nginx
+    depends_on:
+      - php
+    image: nginx-img
+    container_name: nginx-container
+    ports:
+      - '80:80'
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./src:/tire/
+    networks:
+      - nginx-php
+
+  php:
+    build: ./php
+    depends_on:
+      - mariadb
+    image: php-image
+    container_name: php-container
+    ports:
+      - '9000:9000'
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./src:/tire/
+    networks:
+      - nginx-php
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb-container
+    env_file:
+      - .env
+    ports:
+      - '3306:3306'
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - mariadb-volume:/var/lib/mysql
+    networks:
+      - nginx-php
+
+networks:
+  nginx-php:
+    driver: bridge
+
+volumes:
+  mariadb-volume:
